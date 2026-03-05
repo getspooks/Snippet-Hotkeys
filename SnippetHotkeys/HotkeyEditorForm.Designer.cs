@@ -42,7 +42,7 @@
             // labelName
             // 
             labelName.AutoSize = true;
-            labelName.Location = new Point(20, 44);
+            labelName.Location = new Point(20, 15);
             labelName.Name = "labelName";
             labelName.Size = new Size(42, 15);
             labelName.TabIndex = 0;
@@ -51,7 +51,7 @@
             // labelHotkey
             // 
             labelHotkey.AutoSize = true;
-            labelHotkey.Location = new Point(14, 15);
+            labelHotkey.Location = new Point(14, 44);
             labelHotkey.Name = "labelHotkey";
             labelHotkey.Size = new Size(48, 15);
             labelHotkey.TabIndex = 1;
