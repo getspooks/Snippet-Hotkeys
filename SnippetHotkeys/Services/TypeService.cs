@@ -16,6 +16,10 @@ namespace SnippetHotkeys.Services
         [DllImport("user32.dll", SetLastError = true)]
         private static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
+        // Used to check if modifier keys are currently held down
+        [DllImport("user32.dll")]
+        private static extern short GetAsyncKeyState(int vKey);
+
         private const uint INPUT_KEYBOARD = 1;
 
         // Indicates a key release event
@@ -24,6 +28,24 @@ namespace SnippetHotkeys.Services
         // Indicates that wScan contains a Unicode character instead of a
         // hardware scan code.
         private const uint KEYEVENTF_UNICODE = 0x0004;
+
+        // Hardware scan code flag (more “physical key” like)
+        private const uint KEYEVENTF_SCANCODE = 0x0008;
+
+        // Virtual keys (for releasing modifiers)
+        private const int VK_CONTROL = 0x11;
+        private const int VK_MENU = 0x12;   // Alt
+        private const int VK_SHIFT = 0x10;
+        private const int VK_LWIN = 0x5B;
+        private const int VK_RWIN = 0x5C;
+
+        // Scan codes (US keyboard) - these tend to work best in browsers
+        private const ushort SC_TAB = 0x0F;
+        private const ushort SC_ENTER = 0x1C;
+        private const ushort SC_LSHIFT = 0x2A;
+
+        // Marker used by SnippetExpander for {LINEBREAK}
+        private const char LINEBREAK_MARKER = '\uE000';
 
         // Base Win32 input structure passed to SendInput
         [StructLayout(LayoutKind.Sequential)]
@@ -83,11 +105,10 @@ namespace SnippetHotkeys.Services
             // Let focus settle after global hotkey
             Thread.Sleep(20);
 
-            // Normalize CRLF -> LF (we'll send '\n')
+            // Normalize CRLF -> LF (we handle '\n' ourselves)
             text = text.Replace("\r\n", "\n").Replace("\r", "");
 
             // Chunking avoids extremely large SendInput calls
-            // 250 chars => 500 INPUT events (down+up). Adjust if you want
             const int chunkSize = 250;
 
             for (int start = 0; start < text.Length; start += chunkSize)
@@ -107,57 +128,212 @@ namespace SnippetHotkeys.Services
         // sends them using SendInput
         private static bool SendChunk(string chunk)
         {
-            // Each char = 2 INPUTs (down + up)
-            var inputs = new INPUT[chunk.Length * 2];
-            int idx = 0;
+            // Unicode chars are batched for speed; special keys force a flush.
+            var inputs = new System.Collections.Generic.List<INPUT>(chunk.Length * 2);
+
+            bool FlushUnicodeBatch()
+            {
+                if (inputs.Count == 0) return true;
+
+                uint sent = SendInput((uint)inputs.Count, inputs.ToArray(), Marshal.SizeOf(typeof(INPUT)));
+                if (sent != inputs.Count)
+                {
+                    int err = Marshal.GetLastWin32Error();
+                    Debug.WriteLine($"SendInput unicode batch failed/partial. Sent={sent}/{inputs.Count}, Win32Error={err}");
+                    return false;
+                }
+
+                inputs.Clear();
+                return true;
+            }
 
             foreach (char ch in chunk)
             {
-                // key down
-                inputs[idx++] = new INPUT
+                // {ENTER} expands to '\n' in SnippetExpander
+                if (ch == '\n')
                 {
-                    type = INPUT_KEYBOARD,
-                    U = new InputUnion
-                    {
-                        ki = new KEYBDINPUT
-                        {
-                            wVk = 0,
-                            wScan = ch,
-                            dwFlags = KEYEVENTF_UNICODE,
-                            time = 0,
-                            dwExtraInfo = IntPtr.Zero
-                        }
-                    }
-                };
+                    if (!FlushUnicodeBatch()) return false;
 
-                // key up
-                inputs[idx++] = new INPUT
+                    // Global hotkeys can leave modifiers "down" briefly; clean state first.
+                    ReleaseCommonModifiers();
+
+                    // Gmail/Chrome respects a real Enter keypress far more reliably than Unicode '\n'
+                    if (!SendScanKeyPress(SC_ENTER)) return false;
+
+                    Thread.Sleep(2);
+                    continue;
+                }
+
+                // {TAB} expands to '\t'
+                if (ch == '\t')
                 {
-                    type = INPUT_KEYBOARD,
-                    U = new InputUnion
-                    {
-                        ki = new KEYBDINPUT
-                        {
-                            wVk = 0,
-                            wScan = ch,
-                            dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP,
-                            time = 0,
-                            dwExtraInfo = IntPtr.Zero
-                        }
-                    }
-                };
+                    if (!FlushUnicodeBatch()) return false;
+
+                    ReleaseCommonModifiers();
+
+                    if (!SendScanKeyPress(SC_TAB)) return false;
+
+                    Thread.Sleep(2);
+                    continue;
+                }
+
+                // {LINEBREAK} expands to marker (Shift+Enter)
+                if (ch == LINEBREAK_MARKER)
+                {
+                    if (!FlushUnicodeBatch()) return false;
+
+                    ReleaseCommonModifiers();
+
+                    if (!SendShiftEnterScan()) return false;
+
+                    Thread.Sleep(2);
+                    continue;
+                }
+
+                // Normal characters (Unicode typing)
+                AddUnicode(inputs, ch);
             }
 
-            uint sent = SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+            // Send any remaining unicode in one batch
+            return FlushUnicodeBatch();
+        }
 
-            if (sent != inputs.Length)
+        // Adds a single Unicode character to the batch (down+up)
+        private static void AddUnicode(System.Collections.Generic.List<INPUT> list, char ch)
+        {
+            // key down (unicode)
+            list.Add(new INPUT
+            {
+                type = INPUT_KEYBOARD,
+                U = new InputUnion
+                {
+                    ki = new KEYBDINPUT
+                    {
+                        wVk = 0,
+                        wScan = ch,
+                        dwFlags = KEYEVENTF_UNICODE,
+                        time = 0,
+                        dwExtraInfo = IntPtr.Zero
+                    }
+                }
+            });
+
+            // key up (unicode)
+            list.Add(new INPUT
+            {
+                type = INPUT_KEYBOARD,
+                U = new InputUnion
+                {
+                    ki = new KEYBDINPUT
+                    {
+                        wVk = 0,
+                        wScan = ch,
+                        dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP,
+                        time = 0,
+                        dwExtraInfo = IntPtr.Zero
+                    }
+                }
+            });
+        }
+
+        // Sends a single "physical" key press via scan code (down+up)
+        private static bool SendScanKeyPress(ushort scanCode)
+        {
+            var seq = new INPUT[]
+            {
+                new INPUT
+                {
+                    type = INPUT_KEYBOARD,
+                    U = new InputUnion { ki = new KEYBDINPUT { wVk = 0, wScan = scanCode, dwFlags = KEYEVENTF_SCANCODE } }
+                },
+                new INPUT
+                {
+                    type = INPUT_KEYBOARD,
+                    U = new InputUnion { ki = new KEYBDINPUT { wVk = 0, wScan = scanCode, dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP } }
+                }
+            };
+
+            uint sent = SendInput((uint)seq.Length, seq, Marshal.SizeOf(typeof(INPUT)));
+            if (sent != seq.Length)
             {
                 int err = Marshal.GetLastWin32Error();
-                Debug.WriteLine($"SendInput failed/partial. Sent={sent}/{inputs.Length}, Win32Error={err}");
+                Debug.WriteLine($"SendInput scan keypress failed. Sent={sent}/{seq.Length}, Win32Error={err}");
                 return false;
             }
 
             return true;
+        }
+
+        // Sends Shift+Enter using scan codes (best match for Gmail "soft line break")
+        private static bool SendShiftEnterScan()
+        {
+            var seq = new INPUT[]
+            {
+                // Shift down
+                new INPUT
+                {
+                    type = INPUT_KEYBOARD,
+                    U = new InputUnion { ki = new KEYBDINPUT { wVk = 0, wScan = SC_LSHIFT, dwFlags = KEYEVENTF_SCANCODE } }
+                },
+
+                // Enter down
+                new INPUT
+                {
+                    type = INPUT_KEYBOARD,
+                    U = new InputUnion { ki = new KEYBDINPUT { wVk = 0, wScan = SC_ENTER, dwFlags = KEYEVENTF_SCANCODE } }
+                },
+
+                // Enter up
+                new INPUT
+                {
+                    type = INPUT_KEYBOARD,
+                    U = new InputUnion { ki = new KEYBDINPUT { wVk = 0, wScan = SC_ENTER, dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP } }
+                },
+
+                // Shift up
+                new INPUT
+                {
+                    type = INPUT_KEYBOARD,
+                    U = new InputUnion { ki = new KEYBDINPUT { wVk = 0, wScan = SC_LSHIFT, dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP } }
+                }
+            };
+
+            uint sent = SendInput((uint)seq.Length, seq, Marshal.SizeOf(typeof(INPUT)));
+            if (sent != seq.Length)
+            {
+                int err = Marshal.GetLastWin32Error();
+                Debug.WriteLine($"SendInput Shift+Enter scan failed. Sent={sent}/{seq.Length}, Win32Error={err}");
+                return false;
+            }
+
+            return true;
+        }
+
+        // Releases commonly held modifiers so injected keys don't become Ctrl+Enter, etc.
+        private static void ReleaseCommonModifiers()
+        {
+            // Only send "key up" if the key is actually down to avoid weirdness.
+            if (IsDown(VK_CONTROL)) SendVkKeyUp((ushort)VK_CONTROL);
+            if (IsDown(VK_MENU)) SendVkKeyUp((ushort)VK_MENU);
+            if (IsDown(VK_SHIFT)) SendVkKeyUp((ushort)VK_SHIFT);
+            if (IsDown(VK_LWIN)) SendVkKeyUp((ushort)VK_LWIN);
+            if (IsDown(VK_RWIN)) SendVkKeyUp((ushort)VK_RWIN);
+        }
+
+        private static bool IsDown(int vKey) => (GetAsyncKeyState(vKey) & 0x8000) != 0;
+
+        private static void SendVkKeyUp(ushort vk)
+        {
+            var input = new INPUT
+            {
+                type = INPUT_KEYBOARD,
+                U = new InputUnion
+                {
+                    ki = new KEYBDINPUT { wVk = vk, wScan = 0, dwFlags = KEYEVENTF_KEYUP, time = 0, dwExtraInfo = IntPtr.Zero }
+                }
+            };
+
+            SendInput(1, new[] { input }, Marshal.SizeOf(typeof(INPUT)));
         }
     }
 }

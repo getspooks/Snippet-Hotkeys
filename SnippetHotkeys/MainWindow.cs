@@ -64,10 +64,9 @@ namespace SnippetHotkeys
                 var raw = binding.Snippet ?? "";
                 var expanded = _expander.Expand(raw);
 
-                // If you still see braces after expanding, it *might* mean a token didn't match
-                // (This is a quick diagnostic - you can refine later)
-                if (expanded.Contains("{") && expanded.Contains("}"))
-                    SetStatus("⚠ Token may not have expanded (check spelling / version)");
+                // Detect *known* tokens that may have failed to expand (not just any braces)
+                if (ContainsKnownToken(expanded))
+                    SetStatus("⚠ Some tokens did not expand (check spelling / app version)");
                 else
                     SetStatus("Pasted snippet");
 
@@ -76,6 +75,28 @@ namespace SnippetHotkeys
 
             // Register hotkeys + populate UI + set status (single path)
             CommitConfigAndRebind();
+        }
+
+        private static bool ContainsKnownToken(string text)
+        {
+            // Only flag tokens you actually support
+            string[] tokens =
+            {
+                "{NEXT_BUSINESS_DATE}",
+                "{NEXT_BUSINESS_DAY}",
+                "{NEXT_BUSINESS_DAY_DATE}",
+                "{TODAY}",
+                "{NOW}",
+                "{TAB}",
+                "{ENTER}",
+                "{LINEBREAK}",
+            };
+
+            foreach (var t in tokens)
+                if (text.Contains(t, StringComparison.OrdinalIgnoreCase))
+                    return true;
+
+            return false;
         }
 
         // Central helper: persist config + re-register hotkeys + refresh UI + update status

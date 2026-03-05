@@ -28,6 +28,7 @@ namespace SnippetHotkeys.Services
                 // Control tokens (TypeService will type these characters)
                 ["TAB"] = () => "\t",
                 ["ENTER"] = () => "\n",
+                ["LINEBREAK"] = () => "\uE000",     // marker for Shift+Enter
             };
         }
 
@@ -89,6 +90,7 @@ namespace SnippetHotkeys.Services
                 ("{NOW}", "Current date/time (local format).", "Sent {NOW}."),
                 ("{TAB}", "Inserts a tab character (useful for forms).", "Name:{TAB}Value"),
                 ("{ENTER}", "Inserts a new line.", "Line 1{ENTER}Line 2"),
+                ("{LINEBREAK}", "Inserts a soft line break (Shift+Enter). Works better in Gmail.", "Line 1{LINEBREAK}Line 2"),
             };
         }
     }
