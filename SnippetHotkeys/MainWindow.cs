@@ -61,8 +61,17 @@ namespace SnippetHotkeys
 
             _hotkeyService.HotkeyTriggered += (s, binding) =>
             {
-                var text = _expander.Expand(binding.Snippet);
-                _typeService.TypeText(text);
+                var raw = binding.Snippet ?? "";
+                var expanded = _expander.Expand(raw);
+
+                // If you still see braces after expanding, it *might* mean a token didn't match
+                // (This is a quick diagnostic - you can refine later)
+                if (expanded.Contains("{") && expanded.Contains("}"))
+                    SetStatus("⚠ Token may not have expanded (check spelling / version)");
+                else
+                    SetStatus("Pasted snippet");
+
+                _typeService.TypeText(expanded);
             };
 
             // Register hotkeys + populate UI + set status (single path)

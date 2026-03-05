@@ -18,10 +18,16 @@ namespace SnippetHotkeys.Services
         {
             _tokens = new Dictionary<string, Func<string>>(StringComparer.OrdinalIgnoreCase)
             {
+                // Date tokens
+                ["NEXT_BUSINESS_DATE"] = () => GetNextBusinessDate(DateTime.Today).ToString("M/d", CultureInfo.InvariantCulture),
                 ["NEXT_BUSINESS_DAY_DATE"] = () => GetNextBusinessDayDateLabel(DateTime.Today),
                 ["NEXT_BUSINESS_DAY"] = () => GetNextBusinessDayLabel(DateTime.Today),
                 ["TODAY"] = () => DateTime.Today.ToString("M/d", CultureInfo.InvariantCulture),
                 ["NOW"] = () => DateTime.Now.ToString("M/d h:mm tt", CultureInfo.InvariantCulture),
+
+                // Control tokens (TypeService will type these characters)
+                ["TAB"] = () => "\t",
+                ["ENTER"] = () => "\n",
             };
         }
 

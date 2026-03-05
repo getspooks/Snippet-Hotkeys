@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SnippetHotkeys")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0d9baa14f4348face55dd3143b3ae194bf542060")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e65692d23c5bfa7e9398ff027b04f2789a69cb53")]
 [assembly: System.Reflection.AssemblyProductAttribute("SnippetHotkeys")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SnippetHotkeys")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

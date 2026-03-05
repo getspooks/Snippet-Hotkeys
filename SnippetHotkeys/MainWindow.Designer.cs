@@ -148,7 +148,7 @@
             MinimumSize = new Size(400, 200);
             Name = "SnippetHotkeysMW";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Snippet Hotkeys";
+            Text = "Snippet Hotkeys V1.1";
             tableLayoutPanel1.ResumeLayout(false);
             panelButtons.ResumeLayout(false);
             ResumeLayout(false);
