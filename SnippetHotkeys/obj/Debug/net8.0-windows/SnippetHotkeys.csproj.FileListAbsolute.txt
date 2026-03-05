@@ -1,0 +1,17 @@
+C:\dev\SnippetHotkeys\SnippetHotkeys\bin\Debug\net8.0-windows\SnippetHotkeys.exe
+C:\dev\SnippetHotkeys\SnippetHotkeys\bin\Debug\net8.0-windows\SnippetHotkeys.deps.json
+C:\dev\SnippetHotkeys\SnippetHotkeys\bin\Debug\net8.0-windows\SnippetHotkeys.runtimeconfig.json
+C:\dev\SnippetHotkeys\SnippetHotkeys\bin\Debug\net8.0-windows\SnippetHotkeys.dll
+C:\dev\SnippetHotkeys\SnippetHotkeys\bin\Debug\net8.0-windows\SnippetHotkeys.pdb
+C:\dev\SnippetHotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\SnippetHotkeys.csproj.GenerateResource.cache
+C:\dev\SnippetHotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\SnippetHotkeys.GeneratedMSBuildEditorConfig.editorconfig
+C:\dev\SnippetHotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\SnippetHotkeys.AssemblyInfoInputs.cache
+C:\dev\SnippetHotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\SnippetHotkeys.AssemblyInfo.cs
+C:\dev\SnippetHotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\SnippetHotkeys.csproj.CoreCompileInputs.cache
+C:\dev\SnippetHotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\SnippetHotkeys.dll
+C:\dev\SnippetHotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\refint\SnippetHotkeys.dll
+C:\dev\SnippetHotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\SnippetHotkeys.pdb
+C:\dev\SnippetHotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\SnippetHotkeys.genruntimeconfig.cache
+C:\dev\SnippetHotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\ref\SnippetHotkeys.dll
+C:\dev\SnippetHotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\SnippetHotkeys.HotkeyEditorForm.resources
+C:\dev\SnippetHotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\SnippetHotkeys.SnippetHotkeysMW.resources
