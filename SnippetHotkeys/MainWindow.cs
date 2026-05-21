@@ -106,11 +106,20 @@ namespace SnippetHotkeys
             _store.Save(_config);
 
             // Re-register based on latest config
-            // NOTE: This assumes you changed HotkeyService.ApplyBindings(...) to return int registeredCount.
             int enabled = _config.Hotkeys.Count(h => h.Enabled);
             int registered = _hotkeyService.ApplyBindings(_config.Hotkeys);
+            var result = _hotkeyService.LastApplyResult;
 
-            SetStatus($"Hotkeys: {registered}/{enabled} registered");
+            if (result.Failures.Count == 0)
+            {
+                SetStatus($"Hotkeys: {registered}/{enabled} registered");
+                btnViewIssues.Enabled = false;
+            }
+            else
+            {
+                SetStatus($"Hotkeys: {registered}/{enabled} registered - {result.Failures.Count} issue(s)");
+                btnViewIssues.Enabled = true;
+            }
 
             if (refreshList)
                 RefreshHotkeyList();
@@ -216,6 +225,42 @@ namespace SnippetHotkeys
         private void SetStatus(string text)
         {
             lblStatus.Text = text;
+        }
+
+        private void btnViewIssues_Click(object sender, EventArgs e)
+        {
+            var result = _hotkeyService.LastApplyResult;
+
+            if (result.Failures.Count == 0)
+            {
+                MessageBox.Show(
+                    "No hotkey registration issues were found.",
+                    "Hotkey Issues",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
+                return;
+            }
+
+            var lines = result.Failures
+                .Select(f =>
+                {
+                    var name = string.IsNullOrWhiteSpace(f.Binding.Name)
+                        ? "(Unnamed)"
+                        : f.Binding.Name;
+
+                    var hotkey = string.IsNullOrWhiteSpace(f.Binding.Hotkey)
+                        ? "(blank)"
+                        : f.Binding.Hotkey;
+
+                    return $"{name} [{hotkey}]\n{f.Reason}";
+                });
+
+            MessageBox.Show(
+                string.Join("\n\n", lines),
+                "Hotkey Registration Issues",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
         }
     }
 }

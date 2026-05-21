@@ -37,6 +37,7 @@
             btnRemove = new Button();
             btnEdit = new Button();
             btnAdd = new Button();
+            btnViewIssues = new Button();
             tableLayoutPanel1.SuspendLayout();
             panelButtons.SuspendLayout();
             SuspendLayout();
@@ -84,6 +85,7 @@
             // 
             // panelButtons
             // 
+            panelButtons.Controls.Add(btnViewIssues);
             panelButtons.Controls.Add(lblStatus);
             panelButtons.Controls.Add(btnRemove);
             panelButtons.Controls.Add(btnEdit);
@@ -100,7 +102,7 @@
             lblStatus.BorderStyle = BorderStyle.FixedSingle;
             lblStatus.Location = new Point(0, 29);
             lblStatus.Name = "lblStatus";
-            lblStatus.Size = new Size(378, 17);
+            lblStatus.Size = new Size(378, 18);
             lblStatus.TabIndex = 3;
             lblStatus.Text = "Status";
             lblStatus.TextAlign = ContentAlignment.MiddleRight;
@@ -138,6 +140,18 @@
             btnAdd.UseVisualStyleBackColor = true;
             btnAdd.Click += btnAdd_Click;
             // 
+            // btnViewIssues
+            // 
+            btnViewIssues.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnViewIssues.Enabled = false;
+            btnViewIssues.Location = new Point(300, 3);
+            btnViewIssues.Name = "btnViewIssues";
+            btnViewIssues.Size = new Size(75, 23);
+            btnViewIssues.TabIndex = 4;
+            btnViewIssues.Text = "View Issues";
+            btnViewIssues.UseVisualStyleBackColor = true;
+            btnViewIssues.Click += btnViewIssues_Click;
+            // 
             // SnippetHotkeysMW
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -165,5 +179,6 @@
         private Button btnEdit;
         private Button btnAdd;
         private Label lblStatus;
+        private Button btnViewIssues;
     }
 }
