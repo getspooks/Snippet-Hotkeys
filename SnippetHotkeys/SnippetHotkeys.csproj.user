@@ -4,10 +4,13 @@
     <_LastSelectedProfileId>C:\Users\eweir\Source\Repos\Snippet-Hotkeys\SnippetHotkeys\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Update="HotkeyEditorForm.cs">
+    <Compile Update="Forms\TokenHelpForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="MainWindow.cs">
+    <Compile Update="Forms\HotkeyEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>

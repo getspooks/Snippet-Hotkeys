@@ -33,3 +33,4 @@ C:\Users\eweir\Source\Repos\Snippet-Hotkeys\SnippetHotkeys\obj\Debug\net8.0-wind
 C:\Users\eweir\Source\Repos\Snippet-Hotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\SnippetHotkeys.pdb
 C:\Users\eweir\Source\Repos\Snippet-Hotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\SnippetHotkeys.genruntimeconfig.cache
 C:\Users\eweir\Source\Repos\Snippet-Hotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\ref\SnippetHotkeys.dll
+C:\Users\eweir\Source\Repos\Snippet-Hotkeys\SnippetHotkeys\obj\Debug\net8.0-windows\SnippetHotkeys.Forms.TokenHelpForm.resources
