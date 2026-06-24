@@ -12,10 +12,23 @@ using SnippetHotkeys.Services;
 
 namespace SnippetHotkeys.Forms
 {
+    /// ***************************************************************** ///
+    /// Class:      TokenHelpForm
+    /// Summary:    Displays available snippet tokens, descriptions,
+    ///             and examples in a dedicated help window.
+    ///             
+    /// Responsibilities:
+    ///     - Retrieve token metadata from SnippetExpander
+    ///     - Organize tokens into logical categories
+    ///     - Generate readable help text for display
+    ///     - Provide users with a quick token reference
+    /// ***************************************************************** /// 
     public partial class TokenHelpForm : Form
     {
+        // Provides token metadata used to build the help display
         private readonly SnippetExpander _expander = new SnippetExpander();
 
+        // Initializes the form and loads token reference information
         public TokenHelpForm()
         {
             InitializeComponent();
@@ -26,6 +39,8 @@ namespace SnippetHotkeys.Forms
             LoadHelpText();
         }
 
+        // Builds the help text shown in the RichTextBox.
+        // Tokens are grouped into categories to improve readability.
         private void LoadHelpText()
         {
             var sb = new StringBuilder();
@@ -36,7 +51,7 @@ namespace SnippetHotkeys.Forms
 
             foreach (var t in _expander.GetTokenHelp())
             {
-                // Rough grouping until we add categories properly
+                // Skip formatting tokens in this section
                 if (t.Token is "{TAB}" or "{ENTER}" or "{LINEBREAK}")
                     continue;
 
@@ -53,6 +68,7 @@ namespace SnippetHotkeys.Forms
 
             foreach (var t in _expander.GetTokenHelp())
             {
+                // Only show formatting-related tokens in this section
                 if (t.Token is not ("{TAB}" or "{ENTER}" or "{LINEBREAK}"))
                     continue;
 
@@ -62,9 +78,12 @@ namespace SnippetHotkeys.Forms
                 sb.AppendLine();
             }
 
+            // Display generated help text
             rtbHelp.Text = sb.ToString();
         }
 
+        // Reserved for future use if a dedicated Close button
+        // is reintroduced to the form.
         private void btnClose_Click(object sender, EventArgs e)
         {
             Close();
