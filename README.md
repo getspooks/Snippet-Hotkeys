@@ -20,7 +20,7 @@ Lightweight global hotkey snippet tool for Windows.
 
 Download the latest release from:
 
-Releases → SnippetHotkeys-v1.zip
+Releases -> SnippetHotkeys-v1.zip
 
 Run:
 
